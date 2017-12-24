@@ -1,0 +1,103 @@
+#include <iostream>
+#include <memory>
+#include <vector>
+#include <deque>
+#include <stack>
+#include <cmath>
+
+using namespace std;
+
+struct node{
+    int x;
+    shared_ptr <node> next;
+    node(int new_x = 0):
+        x(new_x),
+        next(nullptr)
+    {}
+};
+
+class mlist {
+public:
+
+    shared_ptr <node> mbegin, mend;
+
+    mlist():
+        mbegin(new node()),
+        mend(mbegin)
+    {}
+
+    void push_back(int x) {
+        mend->x = x;
+        mend->next = shared_ptr <node>(new node());
+        mend = mend->next;
+    }
+};
+
+void mysort(auto& mbegin, auto& mend) {
+    if (mbegin == mend || mbegin->next == mend)
+        return;
+
+    int n = 0;
+    auto itcnt = mbegin;
+    while (itcnt != mend) {
+        itcnt = itcnt->next;
+        n++;
+    }
+
+    auto itm = mbegin;
+    for (int i = 0; i < n / 2; ++i)
+        itm = itm->next;
+
+    mysort(mbegin, itm);
+    mysort(itm, mend);
+
+    auto it = mbegin, it2 = itm;
+    mlist l;
+    while (it != itm && it2 != mend) {
+        if (it->x < it2->x) {
+            l.push_back(it->x);
+            it = it->next;
+        }
+        else {
+            l.push_back(it2->x);
+            it2 = it2->next;
+        }
+    }
+    while (it != itm) {
+        l.push_back(it->x);
+        it = it->next;
+    }
+    while (it2 != mend) {
+        l.push_back(it2->x);
+        it2 = it2->next;
+    }
+
+    it = mbegin;
+    auto itl = l.mbegin;
+    while (it != mend) {
+        it->x = itl->x;
+        itl = itl->next;
+        it = it->next;
+    }
+}
+
+int main() {
+    ios_base::sync_with_stdio(false), cin.tie(nullptr);
+
+    int n;
+    mlist l;
+    cin >> n;
+    for (int i = 0; i < n; ++i) {
+        int x;
+        cin >> x;
+        l.push_back(x);
+    }
+
+    mysort(l.mbegin, l.mend);
+
+    shared_ptr <node> it = l.mbegin;
+    while (it != l.mend) {
+        cout << it->x << ' ';
+        it = it->next;
+    }
+}
