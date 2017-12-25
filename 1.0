@@ -1,39 +1,41 @@
 #include <iostream>
 #include <memory>
-#include <vector>
-#include <deque>
-#include <stack>
-#include <cmath>
 
-using namespace std;
-
-struct node{
+struct node {
     int x;
-    shared_ptr <node> next;
+    std::shared_ptr <node> next;
     node(int new_x = 0):
         x(new_x),
         next(nullptr)
     {}
 };
 
-class mlist {
+class mylist {
+    std::shared_ptr <node> mbegin, mend;
+
 public:
 
-    shared_ptr <node> mbegin, mend;
+    std::shared_ptr <node>& begin() {
+        return mbegin;
+    }
 
-    mlist():
+    std::shared_ptr <node>& end() {
+        return mend;
+    }
+
+    mylist():
         mbegin(new node()),
         mend(mbegin)
     {}
 
     void push_back(int x) {
         mend->x = x;
-        mend->next = shared_ptr <node>(new node());
+        mend->next = std::shared_ptr <node>(new node());
         mend = mend->next;
     }
 };
 
-void mysort(auto& mbegin, auto& mend) {
+void mysort(auto mbegin, auto mend) {
     if (mbegin == mend || mbegin->next == mend)
         return;
 
@@ -52,7 +54,7 @@ void mysort(auto& mbegin, auto& mend) {
     mysort(itm, mend);
 
     auto it = mbegin, it2 = itm;
-    mlist l;
+    mylist l;
     while (it != itm && it2 != mend) {
         if (it->x < it2->x) {
             l.push_back(it->x);
@@ -73,7 +75,7 @@ void mysort(auto& mbegin, auto& mend) {
     }
 
     it = mbegin;
-    auto itl = l.mbegin;
+    auto itl = l.begin();
     while (it != mend) {
         it->x = itl->x;
         itl = itl->next;
@@ -82,22 +84,20 @@ void mysort(auto& mbegin, auto& mend) {
 }
 
 int main() {
-    ios_base::sync_with_stdio(false), cin.tie(nullptr);
-
     int n;
-    mlist l;
-    cin >> n;
+    mylist l;
+    std::cin >> n;
     for (int i = 0; i < n; ++i) {
         int x;
-        cin >> x;
+        std::cin >> x;
         l.push_back(x);
     }
 
-    mysort(l.mbegin, l.mend);
+    mysort(l.begin(), l.end());
 
-    shared_ptr <node> it = l.mbegin;
-    while (it != l.mend) {
-        cout << it->x << ' ';
+    std::shared_ptr <node> it = l.begin();
+    while (it != l.end()) {
+        std::cout << it->x << ' ';
         it = it->next;
     }
 }
