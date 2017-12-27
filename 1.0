@@ -42,6 +42,8 @@ void mysort(auto mbegin, auto mend) {
     int n = 0;
     auto itcnt = mbegin;
     while (itcnt != mend) {
+        if (itcnt->x < mbegin->x)
+            std::swap(itcnt->x, mbegin->x);
         itcnt = itcnt->next;
         n++;
     }
@@ -53,34 +55,30 @@ void mysort(auto mbegin, auto mend) {
     mysort(mbegin, itm);
     mysort(itm, mend);
 
-    auto it = mbegin, it2 = itm;
-    mylist l;
+    auto it = mbegin->next, it2 = itm, itcur = mbegin;
     while (it != itm && it2 != mend) {
         if (it->x < it2->x) {
-            l.push_back(it->x);
+            itcur->next = it;
+            itcur = it;
             it = it->next;
         }
         else {
-            l.push_back(it2->x);
+            itcur->next = it2;
+            itcur = it2;
             it2 = it2->next;
         }
     }
     while (it != itm) {
-        l.push_back(it->x);
+        itcur->next = it;
+        itcur = it;
         it = it->next;
     }
     while (it2 != mend) {
-        l.push_back(it2->x);
+        itcur->next = it2;
+        itcur = it2;
         it2 = it2->next;
     }
-
-    it = mbegin;
-    auto itl = l.begin();
-    while (it != mend) {
-        it->x = itl->x;
-        itl = itl->next;
-        it = it->next;
-    }
+    itcur->next = mend;
 }
 
 int main() {
