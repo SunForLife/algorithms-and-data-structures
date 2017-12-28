@@ -1,36 +1,38 @@
 #include <iostream>
 #include <memory>
 
+template <typename T>
 struct node {
-    int x;
+    T x;
     std::shared_ptr <node> next;
-    node(int new_x = 0):
+    node(T new_x = 0):
         x(new_x),
         next(nullptr)
     {}
 };
 
+template <typename T>
 class mylist {
-    std::shared_ptr <node> mbegin, mend;
+    std::shared_ptr <node <T> > mbegin, mend;
 
 public:
 
-    std::shared_ptr <node>& begin() {
+    std::shared_ptr <node <T> >& begin() {
         return mbegin;
     }
 
-    std::shared_ptr <node>& end() {
+    std::shared_ptr <node <T> >& end() {
         return mend;
     }
 
     mylist():
-        mbegin(new node()),
+        mbegin(new node <T>()),
         mend(mbegin)
     {}
 
     void push_back(int x) {
         mend->x = x;
-        mend->next = std::shared_ptr <node>(new node());
+        mend->next = std::shared_ptr <node <T> >(new node <T>());
         mend = mend->next;
     }
 };
@@ -39,7 +41,7 @@ void mysort(auto mbegin, auto mend) {
     if (mbegin == mend || mbegin->next == mend)
         return;
 
-    int n = 0;
+    size_t n = 0;
     auto itcnt = mbegin;
     while (itcnt != mend) {
         if (itcnt->x < mbegin->x)
@@ -49,7 +51,7 @@ void mysort(auto mbegin, auto mend) {
     }
 
     auto itm = mbegin;
-    for (int i = 0; i < n / 2; ++i)
+    for (size_t i = 0; i < n / 2; ++i)
         itm = itm->next;
 
     mysort(mbegin, itm);
@@ -82,10 +84,10 @@ void mysort(auto mbegin, auto mend) {
 }
 
 int main() {
-    int n;
-    mylist l;
+    size_t n = 0;
+    mylist <int> l;
     std::cin >> n;
-    for (int i = 0; i < n; ++i) {
+    for (size_t i = 0; i < n; ++i) {
         int x;
         std::cin >> x;
         l.push_back(x);
@@ -93,7 +95,7 @@ int main() {
 
     mysort(l.begin(), l.end());
 
-    std::shared_ptr <node> it = l.begin();
+    std::shared_ptr <node <int> > it = l.begin();
     while (it != l.end()) {
         std::cout << it->x << ' ';
         it = it->next;
