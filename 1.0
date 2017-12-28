@@ -30,7 +30,7 @@ public:
         mend(mbegin)
     {}
 
-    void push_back(int x) {
+    void push_back(T x) {
         mend->x = x;
         mend->next = std::shared_ptr <node <T> >(new node <T>());
         mend = mend->next;
@@ -88,7 +88,7 @@ int main() {
     mylist <int> l;
     std::cin >> n;
     for (size_t i = 0; i < n; ++i) {
-        int x;
+        int x = 0;
         std::cin >> x;
         l.push_back(x);
     }
