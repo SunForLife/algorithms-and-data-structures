@@ -1,0 +1,103 @@
+#include <iostream>
+#include <memory>
+
+template <typename T>
+struct node {
+    T x;
+    std::shared_ptr <node> next;
+    node(T new_x = 0):
+        x(new_x),
+        next(nullptr)
+    {}
+};
+
+template <typename T>
+class mylist {
+    std::shared_ptr <node <T> > mbegin, mend;
+
+public:
+
+    std::shared_ptr <node <T> >& begin() {
+        return mbegin;
+    }
+
+    std::shared_ptr <node <T> >& end() {
+        return mend;
+    }
+
+    mylist():
+        mbegin(new node <T>()),
+        mend(mbegin)
+    {}
+
+    void push_back(T x) {
+        mend->x = x;
+        mend->next = std::shared_ptr <node <T> >(new node <T>());
+        mend = mend->next;
+    }
+};
+
+void mysort(auto mbegin, auto mend) {
+    if (mbegin == mend || mbegin->next == mend)
+        return;
+
+    size_t n = 0;
+    auto itcnt = mbegin;
+    while (itcnt != mend) {
+        if (itcnt->x < mbegin->x)
+            std::swap(itcnt->x, mbegin->x);
+        itcnt = itcnt->next;
+        n++;
+    }
+
+    auto itm = mbegin;
+    for (size_t i = 0; i < n / 2; ++i)
+        itm = itm->next;
+
+    mysort(mbegin, itm);
+    mysort(itm, mend);
+
+    auto it = mbegin->next, it2 = itm, itcur = mbegin;
+    while (it != itm && it2 != mend) {
+        if (it->x < it2->x) {
+            itcur->next = it;
+            itcur = it;
+            it = it->next;
+        }
+        else {
+            itcur->next = it2;
+            itcur = it2;
+            it2 = it2->next;
+        }
+    }
+    while (it != itm) {
+        itcur->next = it;
+        itcur = it;
+        it = it->next;
+    }
+    while (it2 != mend) {
+        itcur->next = it2;
+        itcur = it2;
+        it2 = it2->next;
+    }
+    itcur->next = mend;
+}
+
+int main() {
+    size_t n = 0;
+    mylist <int> l;
+    std::cin >> n;
+    for (size_t i = 0; i < n; ++i) {
+        int x = 0;
+        std::cin >> x;
+        l.push_back(x);
+    }
+
+    mysort(l.begin(), l.end());
+
+    std::shared_ptr <node <int> > it = l.begin();
+    while (it != l.end()) {
+        std::cout << it->x << ' ';
+        it = it->next;
+    }
+}
