@@ -5,7 +5,7 @@
 template <class KeyType, class ValueType, class Hash = std::hash<KeyType> >
 class HashMap {
     size_t sz;
-    int mod, mx = 2;
+    int mod, mx = 3;
     std::list <std::pair <const KeyType, ValueType> > l;
     std::vector <typename std::list <std::pair <const KeyType, ValueType> >::iterator> v;
     std::vector <int> num;
@@ -84,28 +84,28 @@ public:
 
     Hash hash_function() const { return hasher; }
 
-    void insert(std::pair <const KeyType, ValueType> el) {
+    void insert(const std::pair <const KeyType, ValueType>& el) {
         const KeyType key = el.first;
         size_t hs = hasher(key) % mod;
         bool flag = true;
         auto it = v[hs];
         for (int i = 0; i < num[hs]; ++i, ++it)
-            if (key == (*it).first)
+            if (key == it->first)
                 flag = false;
         if (flag) {
             sz++;
             v[hs] = l.insert(v[hs], el);
             num[hs]++;
         }
-        if (static_cast <int>(sz) > mx * mod)
+        if (static_cast <int> (sz) > mx * mod)
             *this = HashMap(l.begin(), l.end(), hasher);
     }
 
-    void erase(const KeyType key) {
+    void erase(const KeyType& key) {
         size_t hs = hasher(key) % mod;
         auto it = v[hs];
         for (int i = 0; i < num[hs]; ++i, ++it)
-            if (key == (*it).first) {
+            if (key == it->first) {
                 sz--;
                 num[hs]--;
                 if (i == 0)
@@ -119,56 +119,56 @@ public:
     }
 
     using iterator = typename std::list <std::pair <const KeyType, ValueType> >::iterator;
-    typename std::list <std::pair <const KeyType, ValueType> >::iterator begin() {
+    iterator begin() {
         return l.begin();
     }
-    typename std::list <std::pair <const KeyType, ValueType> >::iterator end() {
+    iterator end() {
         return l.end();
     }
 
     using const_iterator = typename std::list <std::pair <const KeyType, ValueType> >::const_iterator;
-    typename std::list <std::pair <const KeyType, ValueType> >::const_iterator begin() const {
+    const_iterator begin() const {
         return l.begin();
     }
-    typename std::list <std::pair <const KeyType, ValueType> >::const_iterator end() const {
+    const_iterator end() const {
         return l.end();
     }
 
-    typename std::list <std::pair <const KeyType, ValueType> >::iterator find(const KeyType key) {
+    iterator find(const KeyType key) {
         size_t hs = hasher(key) % mod;
         auto it = v[hs];
         for (int i = 0; i < num[hs]; ++i, ++it)
-            if (key == (*it).first)
+            if (key == it->first)
                 return it;
         return l.end();
     }
-    typename std::list <std::pair <const KeyType, ValueType> >::const_iterator find(const KeyType key) const {
+    const_iterator find(const KeyType key) const {
         size_t hs = hasher(key) % mod;
         auto it = v[hs];
         for (int i = 0; i < num[hs]; ++i, ++it)
-            if (key == (*it).first)
+            if (key == it->first)
                 return it;
         return l.end();
     }
 
-    ValueType& operator[](const KeyType key) {
+    ValueType& operator[](const KeyType& key) {
         size_t hs = hasher(key) % mod;
         insert({key, ValueType()});
         hs = hasher(key) % mod;
         auto it = v[hs];
         for (int i = 0; i < num[hs]; ++i, ++it)
-            if (key == (*it).first)
-                return (*it).second;
+            if (key == it->first)
+                return it->second;
         throw std::runtime_error("should never happen");
     }
-    const ValueType& at(const KeyType key) const {
+    const ValueType& at(const KeyType& key) const {
         size_t hs = hasher(key) % mod;
         if (num[hs] == 0)
             throw std::out_of_range("bad range");
         auto it = v[hs];
         for (int i = 0; i < num[hs]; ++i, ++it)
-            if (key == (*it).first)
-                return (*it).second;
+            if (key == it->first)
+                return it->second;
         throw std::out_of_range("bad range");
     }
 
