@@ -1,0 +1,184 @@
+#include <vector>
+#include <list>
+#include <memory>
+
+template <class KeyType, class ValueType, class Hash = std::hash<KeyType> >
+class HashMap {
+    size_t sz;
+    int mod, mx = 3;
+    std::list <std::pair <const KeyType, ValueType> > l;
+    std::vector <typename std::list <std::pair <const KeyType, ValueType> >::iterator> v;
+    std::vector <int> num;
+    Hash hasher;
+
+public:
+    HashMap(Hash hasher = Hash()) : hasher(hasher) {
+        sz = 0;
+        mod = 1;
+        v.push_back(l.end());
+        num.push_back(0);
+    }
+    template <class IteratorType>
+    HashMap(IteratorType itbegin, IteratorType itend, Hash hasher = Hash()): hasher(hasher) {
+        sz = 0;
+        auto itcur = itbegin;
+        while (itcur != itend) {
+            sz++;
+            itcur++;
+        }
+
+        mod = std::max(1, static_cast <int> (sz));
+        v.resize(mod, l.end());
+        num.resize(mod, 0);
+
+        while (itbegin != itend) {
+            const auto p = *itbegin;
+            const KeyType key = p.first;
+            size_t hs = hasher(key) % mod;
+            v[hs] = l.insert(v[hs], p);
+            num[hs]++;
+            itbegin++;
+        }
+    }
+    HashMap(std::initializer_list<std::pair <const KeyType, ValueType> > il, Hash hasher = Hash())
+    : HashMap(il.begin(), il.end(), hasher)
+    {}
+    HashMap(const HashMap <KeyType, ValueType>& oth)
+    : HashMap(oth.begin(), oth.end(), oth.hash_function())
+    {}
+
+    HashMap& operator=(const HashMap& oth) {
+        if (this == &oth)
+            return *this;
+
+        clear();
+
+        hasher = oth.hash_function();
+
+        sz = 0;
+        auto itbegin = oth.begin(), itend = oth.end();
+        auto itcur = itbegin;
+        while (itcur != itend) {
+            sz++;
+            itcur++;
+        }
+
+        mod = std::max(1, static_cast <int> (sz));
+        v.resize(mod, l.end());
+        num.resize(mod, 0);
+        while (itbegin != itend) {
+            const auto p = *itbegin;
+            const KeyType key = p.first;
+            size_t hs = oth.hasher(key) % mod;
+            v[hs] = l.insert(v[hs], p);
+            num[hs]++;
+            itbegin++;
+        }
+
+        return *this;
+    }
+
+    size_t size() const { return sz; }
+
+    bool empty() const { return !sz; }
+
+    Hash hash_function() const { return hasher; }
+
+    void insert(const std::pair <const KeyType, ValueType>& el) {
+        const KeyType key = el.first;
+        size_t hs = hasher(key) % mod;
+        bool flag = true;
+        auto it = v[hs];
+        for (int i = 0; i < num[hs]; ++i, ++it)
+            if (key == it->first)
+                flag = false;
+        if (flag) {
+            sz++;
+            v[hs] = l.insert(v[hs], el);
+            num[hs]++;
+        }
+        if (static_cast <int> (sz) > mx * mod)
+            *this = HashMap(l.begin(), l.end(), hasher);
+    }
+
+    void erase(const KeyType& key) {
+        size_t hs = hasher(key) % mod;
+        auto it = v[hs];
+        for (int i = 0; i < num[hs]; ++i, ++it)
+            if (key == it->first) {
+                sz--;
+                num[hs]--;
+                if (i == 0)
+                    v[hs] = l.erase(it);
+                else
+                    l.erase(it);
+                if (num[hs] == 0)
+                    v[hs] = l.end();
+                break;
+            }
+    }
+
+    using iterator = typename std::list <std::pair <const KeyType, ValueType> >::iterator;
+    iterator begin() {
+        return l.begin();
+    }
+    iterator end() {
+        return l.end();
+    }
+
+    using const_iterator = typename std::list <std::pair <const KeyType, ValueType> >::const_iterator;
+    const_iterator begin() const {
+        return l.begin();
+    }
+    const_iterator end() const {
+        return l.end();
+    }
+
+    iterator find(const KeyType key) {
+        size_t hs = hasher(key) % mod;
+        auto it = v[hs];
+        for (int i = 0; i < num[hs]; ++i, ++it)
+            if (key == it->first)
+                return it;
+        return l.end();
+    }
+    const_iterator find(const KeyType key) const {
+        size_t hs = hasher(key) % mod;
+        auto it = v[hs];
+        for (int i = 0; i < num[hs]; ++i, ++it)
+            if (key == it->first)
+                return it;
+        return l.end();
+    }
+
+    ValueType& operator[](const KeyType& key) {
+        size_t hs = hasher(key) % mod;
+        insert({key, ValueType()});
+        hs = hasher(key) % mod;
+        auto it = v[hs];
+        for (int i = 0; i < num[hs]; ++i, ++it)
+            if (key == it->first)
+                return it->second;
+        throw std::runtime_error("should never happen");
+    }
+    const ValueType& at(const KeyType& key) const {
+        size_t hs = hasher(key) % mod;
+        if (num[hs] == 0)
+            throw std::out_of_range("bad range");
+        auto it = v[hs];
+        for (int i = 0; i < num[hs]; ++i, ++it)
+            if (key == it->first)
+                return it->second;
+        throw std::out_of_range("bad range");
+    }
+
+    void clear() {
+        sz = 0;
+        mod = 1;
+        l.clear();
+        v.clear();
+        num.clear();
+        v.push_back(l.end());
+        num.push_back(0);
+    }
+};
