@@ -3,25 +3,23 @@
 #include <set>
 #include <algorithm>
 
-using namespace std;
-
-const int INF = 1e9, maxSize = 1e5;
+const int INF = 1e9, MAX_SIZE = 1e5;
 
 class Graph {
-    struct edge {
+    struct Edge {
         int to, f, c, p, rev, id;
     };
 
     int n, s, t;
-    vector <vector <edge> > g;
-    vector <int> p;
-    vector <pair <int, int> > pfrom;
-    vector <vector <int> > dec;
+    std::vector <std::vector <Edge> > g;
+    std::vector <int> p;
+    std::vector <std::pair <int, int> > pfrom;
+    std::vector <std::vector <int> > dec;
 
     inline void ford_bellman() {
-        for (int step = 0; step < n; ++step) {
-            for (int from = 1; from <= n; ++from) {
-                for (int i = 0; i < g[from].size(); ++i){
+        for (size_t step = 0; step < n; ++step) {
+            for (size_t from = 1; from <= n; ++from) {
+                for (size_t i = 0; i < g[from].size(); ++i){
                     int to = g[from][i].to, ep = g[from][i].p;
                     if (g[from][i].c - g[from][i].f > 0 && p[to] > p[from] + ep) {
                         p[to] = p[from] + ep;
@@ -32,13 +30,13 @@ class Graph {
         }
     }
 
-    vector <int> d;
-    set <pair <int, int> > ms;
+    std::vector <int> d;
+    std::set <std::pair <int, int> > ms;
     inline void dij(int x) {
         if (!ms.empty())
             ms.erase(ms.begin());
 
-        for (int i = 0; i < g[x].size(); ++i) {
+        for (size_t i = 0; i < g[x].size(); ++i) {
             auto e = g[x][i];
             int to = e.to, ep = e.p;
             if (e.f < e.c && d[to] > p[x] + d[x] + ep - p[to]) {
@@ -53,7 +51,7 @@ class Graph {
             dij(ms.begin()->second);
     }
 
-    vector <int> used;
+    std::vector <int> used;
     inline bool dfs(int x, int step) {
         used[x] = step + 1;
 
@@ -122,7 +120,7 @@ public:
     }
 
     inline void clear_roads() {
-        vector <int> cnt(maxSize + 1);
+        std::vector <int> cnt(MAX_SIZE + 1);
         for (int i = 1; i <= n; ++i) {
             for (auto& e : g[i]) {
                 if (e.f == 1)
@@ -137,7 +135,7 @@ public:
         }
     }
 
-    inline vector <vector <int> > decomposition(int k) {
+    inline std::vector <std::vector <int> > decomposition(int k) {
         dec.resize(k);
         used.resize(n + 1);
         for (int i = 0; i < k; ++i)
@@ -147,17 +145,14 @@ public:
 };
 
 int main() {
-    ios_base::sync_with_stdio(false), cin.tie(nullptr), cout.tie(nullptr);
-    cout.precision(16);
-
     int n, m, k;
-    cin >> n >> m >> k;
+    std::cin >> n >> m >> k;
 
     Graph g(n, 1, n);
 
-    for (int i = 0; i < m; ++i) {
+    for (size_t i = 0; i < m; ++i) {
         int from, to, p;
-        cin >> from >> to >> p;
+        std::cin >> from >> to >> p;
 
         g.make_edge(from, to, p, i + 1);
         g.make_edge(to, from, p, i + 1);
@@ -165,17 +160,17 @@ int main() {
 
     double flow = g.build_flow(k);
     if (flow == -1)
-        return cout << -1, 0;
+        return std::cout << -1, 0;
     else
-        cout << flow / k << '\n';
+        std::cout << flow / k << '\n';
 
     g.clear_roads();
     auto ans = g.decomposition(k);
-    for (int i = 0; i < k; ++i) {
-        cout << ans[i].size() << ' ';
+    for (size_t i = 0; i < k; ++i) {
+        std::cout << ans[i].size() << ' ';
         reverse(ans[i].begin(), ans[i].end());
         for (int x : ans[i])
-            cout << x << ' ';
-        cout << '\n';
+            std::cout << x << ' ';
+        std::cout << '\n';
     }
 }
