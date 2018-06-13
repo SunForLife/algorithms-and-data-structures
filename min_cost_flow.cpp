@@ -10,15 +10,15 @@ class Graph {
         int to, f, c, p, rev, id;
     };
 
-    int n, s, t;
+    int graphSize, start, terminal;
     std::vector <std::vector <Edge> > g;
     std::vector <int> p;
     std::vector <std::pair <int, int> > pfrom;
     std::vector <std::vector <int> > dec;
 
     inline void ford_bellman() {
-        for (size_t step = 0; step < n; ++step) {
-            for (size_t from = 1; from <= n; ++from) {
+        for (size_t step = 0; step < graphSize; ++step) {
+            for (size_t from = 1; from <= graphSize; ++from) {
                 for (size_t i = 0; i < g[from].size(); ++i){
                     int to = g[from][i].to, ep = g[from][i].p;
                     if (g[from][i].c - g[from][i].f > 0 && p[to] > p[from] + ep) {
@@ -55,7 +55,7 @@ class Graph {
     inline bool dfs(int x, int step) {
         used[x] = step + 1;
 
-        if (x == t)
+        if (x == terminal)
             return true;
 
         for (auto& e : g[x]) {
@@ -75,9 +75,9 @@ class Graph {
 public:
 
     Graph() {};
-    Graph(int _n, int _s, int _t) {
-        n = _n, s = _s, t = _t;
-        g.resize(n + 1);
+    Graph(int _graphSize, int _start, int _terminal) {
+        graphSize = _graphSize, start = _start, terminal = _terminal;
+        g.resize(graphSize + 1);
     }
 
     inline void make_edge(int from, int to, int p, int id) {
@@ -88,18 +88,18 @@ public:
     inline int build_flow(int k) {
         int flow = 0, cnt = 0;
         p.clear(), pfrom.clear();
-        p.resize(n + 1, INF);
-        p[s] = 0;
-        pfrom.resize(n + 1);
+        p.resize(graphSize + 1, INF);
+        p[start] = 0;
+        pfrom.resize(graphSize + 1);
 
         ford_bellman();
 
-        while (p[t] < INF && cnt < k) {
-            flow += p[t];
+        while (p[terminal] < INF && cnt < k) {
+            flow += p[terminal];
             cnt++;
 
-            int it = t;
-            while (it != s) {
+            int it = terminal;
+            while (it != start) {
                 auto& e = g[pfrom[it].first][pfrom[it].second];
                 e.f++;
                 g[e.to][e.rev].f--;
@@ -107,12 +107,12 @@ public:
             }
 
             d.clear();
-            d.resize(n + 1, 2 * INF);
+            d.resize(graphSize + 1, 2 * INF);
             pfrom.clear();
-            pfrom.resize(n + 1);
-            d[s] = 0;
-            dij(s);
-            for (int i = 1; i <= n; ++i)
+            pfrom.resize(graphSize + 1);
+            d[start] = 0;
+            dij(start);
+            for (size_t i = 1; i <= graphSize; ++i)
                 p[i] += d[i];
         }
 
@@ -121,13 +121,13 @@ public:
 
     inline void clear_roads() {
         std::vector <int> cnt(MAX_SIZE + 1);
-        for (int i = 1; i <= n; ++i) {
+        for (size_t i = 1; i <= graphSize; ++i) {
             for (auto& e : g[i]) {
                 if (e.f == 1)
                     cnt[e.id]++;
             }
         }
-        for (int i = 1; i <= n; ++i) {
+        for (size_t i = 1; i <= graphSize; ++i) {
             for (auto& e : g[i]) {
                 if (e.f == 1 && cnt[e.id] == 2)
                     e.f--;
@@ -137,9 +137,9 @@ public:
 
     inline std::vector <std::vector <int> > decomposition(int k) {
         dec.resize(k);
-        used.resize(n + 1);
-        for (int i = 0; i < k; ++i)
-            dfs(s, i);
+        used.resize(graphSize + 1);
+        for (size_t i = 0; i < k; ++i)
+            dfs(start, i);
         return dec;
     }
 };
