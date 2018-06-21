@@ -148,8 +148,10 @@ int main() {
     int n, m, k;
     std::cin >> n >> m >> k;
 
+    // initialising graph
     Graph g(n, 1, n);
 
+    // making edges
     for (size_t i = 0; i < m; ++i) {
         int from, to, p;
         std::cin >> from >> to >> p;
@@ -158,12 +160,15 @@ int main() {
         g.make_edge(to, from, p, i + 1);
     }
 
+    // building flow
     double flow = g.build_flow(k);
+    
+    // printing answer
     if (flow == -1)
         return std::cout << -1, 0;
     else
         std::cout << flow / k << '\n';
-
+    
     g.clear_roads();
     auto ans = g.decomposition(k);
     for (size_t i = 0; i < k; ++i) {
