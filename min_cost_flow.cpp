@@ -144,14 +144,11 @@ public:
     }
 };
 
-int main() {
-    int n, m, k;
+inline void read(int& n, int& m, int& k, Graph& g) {
     std::cin >> n >> m >> k;
 
-    // initialising graph
-    Graph g(n, 1, n);
+    g = Graph(n, 1, n);
 
-    // making edges
     for (size_t i = 0; i < m; ++i) {
         int from, to, p;
         std::cin >> from >> to >> p;
@@ -159,23 +156,36 @@ int main() {
         g.make_edge(from, to, p, i + 1);
         g.make_edge(to, from, p, i + 1);
     }
+}
 
-    // building flow
-    double flow = g.build_flow(k);
-    
-    // printing answer
+inline void solve(Graph& g, int& k, double& flow) {
+    flow = g.build_flow(k);
+}
+
+inline void print(double& flow, Graph& g, int& k) {
     if (flow == -1)
-        return std::cout << -1, 0;
-    else
+        std::cout << -1, 0;
+    else {
         std::cout << flow / k << '\n';
-    
-    g.clear_roads();
-    auto ans = g.decomposition(k);
-    for (size_t i = 0; i < k; ++i) {
-        std::cout << ans[i].size() << ' ';
-        reverse(ans[i].begin(), ans[i].end());
-        for (int x : ans[i])
-            std::cout << x << ' ';
-        std::cout << '\n';
+        g.clear_roads();
+        auto ans = g.decomposition(k);
+
+        for (size_t i = 0; i < k; ++i) {
+            std::cout << ans[i].size() << ' ';
+            reverse(ans[i].begin(), ans[i].end());
+            for (int x : ans[i])
+                std::cout << x << ' ';
+            std::cout << '\n';
+        }
     }
+}
+
+int main() {
+    int n, m, k;
+    double flow;
+    Graph g;
+
+    read(n, m, k, g);
+    solve(g, k, flow);
+    print(flow, g, k);
 }
